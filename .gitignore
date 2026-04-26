@@ -1,0 +1,32 @@
+# ── Dados gerados pelo Spark/Iceberg ──────────────────────────────────────────
+spark-warehouse/
+iceberg-warehouse/
+metastore_db/
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+derby.log
+*.log
+
+# ── Ambiente virtual e caches Python ─────────────────────────────────────────
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# ── Cache do Jupyter ──────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+
+# ── Cache do Ivy / Maven (JARs baixados pelo Spark) ──────────────────────────
+.ivy*/
+.m2/
+
+# ── Sistema operacional ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── IDEs ─────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+
+# ── Ferramentas de desenvolvimento local ─────────────────────────────────────
+.claude/

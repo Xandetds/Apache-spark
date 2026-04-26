@@ -1,0 +1,15 @@
+site_name: Spark, Delta Lake e Apache Iceberg
+theme:
+  name: material
+
+nav:
+  - Contextualização: index.md
+  - Apache Spark (PySpark): apache-spark.md
+  - Delta Lake: delta-lake.md
+  - Apache Iceberg: apache-iceberg.md
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
