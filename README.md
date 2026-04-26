@@ -142,8 +142,8 @@ Utilizamos o GitHub para o versionamento semântico do código. Para a documenta
 | Nome | Papel | GitHub |
 |---|---|---|
 | Alexandre Tibes | Engenharia de Dados e Infraestrutura | [@Xandetds](https://github.com/Xandetds) |
-| Roger Balcevicz | Desenvolvimento | GitHub |
-| Murilo Salvan | Documentação e Estruturação | GitHub |
+| Roger Balcevicz | Desenvolvimento | [@Roger Balcevicz](https://github.com/Roger-Balcevicz) |
+| Murilo Salvan | Documentação e Estruturação | [@omrl](https://github.com/omrl) |
 
 ---
 
