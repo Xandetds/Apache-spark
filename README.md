@@ -1,120 +1,161 @@
 # Engenharia de Dados — Delta Lake & Apache Iceberg
 
-**Grupo:** Alexandre Tibes · Roger Balcevicz · Murilo Salvan  
-**Documentação Completa:** [https://Xandetds.github.io/Apache-spark/](https://Xandetds.github.io/Apache-spark/)
+[![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![Docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://Xandetds.github.io/Apache-spark/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-## Sobre o Projeto
-
-Este projeto acadêmico demonstra as capacidades de dois dos principais formatos modernos de tabelas para a arquitetura Data Lakehouse: **Delta Lake** e **Apache Iceberg**. 
-
-Utilizando o motor do **Apache Spark**, o projeto ingere um dataset local com 500 vagas de emprego na área de Inteligência Artificial e executa operações transacionais (ACID: INSERT, UPDATE, DELETE), além de demonstrar o recurso de Time Travel e controle de Snapshots.
+Repositório modelo para desenvolvimento de projetos da disciplina de Engenharia de Dados do curso de Engenharia de Software da UNISATC. Demonstração prática de um ambiente Apache Spark local processando dados com duas tecnologias de tabelas abertas (open table formats): **Delta Lake** e **Apache Iceberg**.
 
 ---
 
-## Pré-requisitos
+## Desenho de Arquitetura
 
-Para garantir a execução correta sem conflitos de ambiente, o projeto foi estruturado para rodar no **Ubuntu (WSL 2)**. 
+O fluxo de dados consiste na ingestão de um dataset em formato bruto (CSV) processado na memória pelo Apache Spark e persistido fisicamente em duas arquiteturas de Lakehouse distintas para fins de comparação.
 
-| Ferramenta | Versão | Finalidade |
-|---|---|---|
-| Ubuntu (WSL 2) | 22.04+ | Ambiente isolado de execução |
-| Java (OpenJDK) | 17 | Runtime obrigatório do Apache Spark |
-| uv | 0.4+ | Gerenciamento de dependências e ambiente virtual |
-| Python | 3.11+ | Linguagem base (gerenciada pelo uv) |
+```mermaid
+graph LR
+    A[(data/ai_jobs.csv)] -->|Ingestão| B((Apache Spark))
+
+    B -->|Transaction Log / JSON| C[(Delta Lake Warehouse)]
+    C -->|ACID: Insert, Update, Delete| C
+
+    B -->|Metadata Tree / Avro| D[(Apache Iceberg Warehouse)]
+    D -->|ACID: Insert, Update, Delete| D
+
+    classDef spark fill:#e56e15,stroke:#333,stroke-width:2px,color:#fff;
+    classDef storage fill:#005288,stroke:#333,stroke-width:2px,color:#fff;
+    class B spark;
+    class C,D storage;
+```
 
 ---
 
-## Configurando o Ambiente
+## Pré-requisitos e Ferramentas
 
-### 1. Instalação do Java 17
+| Componente | Detalhe |
+|---|---|
+| Sistema Operacional | Ubuntu (WSL 2) recomendado |
+| Linguagem | Python 3.11+ |
+| Runtime | Java 17 (OpenJDK) — obrigatório para o Spark |
+| Gerenciador de Pacotes | `uv` |
+| Motor de Processamento | Apache Spark (PySpark) |
+| Formatos de Armazenamento | Delta Lake & Apache Iceberg |
+| Ambiente de Desenvolvimento | JupyterLab |
+| Documentação | MkDocs + mkdocs-material |
 
-O Spark exige o Java para rodar. No terminal do seu Ubuntu (WSL), execute:
+---
+
+## Instalação
+
+### 1. Clonar o repositório
+
+```bash
+git clone https://github.com/Xandetds/Apache-spark.git
+cd Apache-spark
+```
+
+### 2. Instalar o Java 17
+
+O PySpark requer o Java instalado e a variável `JAVA_HOME` configurada. No Ubuntu/WSL:
 
 ```bash
 sudo apt update && sudo apt install -y openjdk-17-jdk
-```
-
-Para garantir que o Java fique salvo nas variáveis de ambiente:
-
-```bash
 echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' >> ~/.bashrc
 echo 'export PATH="$JAVA_HOME/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### 2. Instalação do gerenciador uv
+### 3. Instalar o uv e sincronizar as dependências
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source ~/.bashrc
 ```
 
-### 3. Clone e Sincronização
-
-Clone este repositório e baixe todas as bibliotecas necessárias de forma automática:
+O `uv` lerá o `pyproject.toml` e instalará o ambiente virtual isolado (`.venv`):
 
 ```bash
-git clone https://github.com/Xandetds/Apache-spark.git
-cd Apache-spark
 uv sync
 ```
 
-> O comando `uv sync` cria o ambiente virtual e instala PySpark, Delta, JupyterLab e MkDocs automaticamente.
-
 ---
 
-## Executando os Notebooks
+## Executar Localmente
 
-> **IMPORTANTE:** Para evitar o erro `ModuleNotFoundError`, não abra os notebooks clicando diretamente neles pelo VS Code no Windows. Inicie o servidor pelo terminal do WSL usando o `uv`.
-
-No terminal do Ubuntu, dentro da pasta do projeto, inicie o JupyterLab:
+Para explorar os notebooks, inicie o servidor do JupyterLab pelo `uv`:
 
 ```bash
 uv run jupyter lab
 ```
 
-O terminal exibirá uma URL com um token (ex: `http://localhost:8888/lab?token=...`). Copie essa URL e cole no seu navegador.
+Acesse o ambiente no navegador em `http://localhost:8888`.
 
-### Ordem de Execução
-
-1. `delta_lake.ipynb` — Execute todas as células em ordem (`Shift + Enter`). Este notebook criará a tabela Delta e demonstrará as operações.
-
-2. **Desligue o Kernel do Delta** — No menu superior do JupyterLab, vá em `Kernel > Shut Down Kernel`. Isso evita que duas instâncias do Spark briguem pela mesma porta local.
-
-3. `apache_iceberg.ipynb` — Abra o arquivo e execute as células. Na primeira execução, o Spark baixará o conector do Iceberg via Maven Central (~80 MB).
+> **Importante:** Execute as células em ordem. A primeira célula de cada notebook pode demorar pois o Spark precisa baixar os conectores do Delta/Iceberg via Maven. Certifique-se de encerrar o Kernel de um notebook (`Kernel > Shut Down Kernel`) antes de abrir o outro para evitar conflito de portas no Spark local.
 
 ---
 
 ## Documentação (MkDocs)
 
-A documentação detalhada foi gerada usando o MkDocs Material e está publicada no GitHub Pages.
+Toda a documentação teórica e técnica está na pasta `docs/`.
 
-### Visualizando localmente
+### Visualizar localmente
 
 ```bash
 uv run mkdocs serve
 ```
 
-Acesse `http://127.0.0.1:8000` no seu navegador.
+Acesse `http://127.0.0.1:8000` no navegador.
 
-### Publicando atualizações
+### Publicar no GitHub Pages
 
 ```bash
 uv run mkdocs gh-deploy
 ```
 
 ---
-
-## Comparativo Técnico do Projeto
-
-| Característica | Delta Lake | Apache Iceberg |
-|---|---|---|
-| Armazenamento | Parquet + `_delta_log/` (JSON) | Parquet + `metadata/` (Avro/JSON) |
-| Controle de versão | Versões numéricas (0, 1, 2...) | Snapshot IDs únicos (long integer) |
-| Time Travel | `VERSION AS OF 0` | `VERSION AS OF <snapshot_id>` |
-| Auditoria | `DESCRIBE HISTORY <table>` | `SELECT * FROM <table>.snapshots` |
-| Engines suportadas | Foco em Spark e Databricks | Spark, Flink, Trino, Presto, Snowflake |
-| Setup do Catálogo | `DeltaCatalog` (substitui o padrão) | `SparkCatalog` (adicionado via Hadoop) |
+**Documentação completa ->** https://xandetds.github.io/Apache-spark/
 
 ---
 
+## Colaboração
+
+1. Abra uma issue para discutir sua feature ou bug.
+2. Crie um branch:
+   ```bash
+   git checkout -b feature/nome-da-sua-feature
+   ```
+3. Faça suas alterações e commit seguindo o [Conventional Commits](https://www.conventionalcommits.org/).
+4. Envie um pull request para `main`.
+5. Aguarde revisão e merge.
+
+---
+
+## Versionamento
+
+Utilizamos o GitHub para o versionamento semântico do código. Para a documentação das operações ACID, as bibliotecas utilizadas mantêm o controle de versão de dados interno (Time Travel no Delta Lake e Snapshot Tracking no Apache Iceberg).
+
+---
+
+## Autores
+
+| Nome | Papel | GitHub |
+|---|---|---|
+| Alexandre Tibes | Engenharia de Dados e Infraestrutura | [@Xandetds](https://github.com/Xandetds) |
+| Roger Balcevicz | Desenvolvimento | GitHub |
+| Murilo Salvan | Documentação e Estruturação | GitHub |
+
+---
+
+## Licença
+
+Este projeto está sob a licença MIT — veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+---
+
+## Referências
+
+- [Documentação Oficial do Apache Spark](https://spark.apache.org/docs/latest/)
+- [Delta Lake Docs](https://docs.delta.io/)
+- [Apache Iceberg Spark Quickstart](https://iceberg.apache.org/docs/latest/spark-quickstart/)
+- [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)
