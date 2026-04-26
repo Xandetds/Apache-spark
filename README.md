@@ -1,61 +1,40 @@
-# Arquitetura de Dados — Delta Lake & Apache Iceberg
+# Engenharia de Dados — Delta Lake & Apache Iceberg
 
-**Grupo:** Alexandre Tibes · Roger Balcevicz · Murilo Salvan
+**Grupo:** Alexandre Tibes · Roger Balcevicz · Murilo Salvan  
+**Documentação Completa:** [https://Xandetds.github.io/Apache-spark/](https://Xandetds.github.io/Apache-spark/)
 
-Projeto acadêmico que demonstra, lado a lado, as capacidades de dois formatos modernos de tabela
-para Data Lakehouse: **Delta Lake** e **Apache Iceberg**. Ambos operam sobre o mesmo dataset de
-vagas de emprego em IA, provando suporte a operações ACID e Time Travel via Apache Spark.
+## Sobre o Projeto
 
----
+Este projeto acadêmico demonstra as capacidades de dois dos principais formatos modernos de tabelas para a arquitetura Data Lakehouse: **Delta Lake** e **Apache Iceberg**. 
 
-## Arquitetura do Projeto
-
-```
-Apache-spark/
-├── data/
-│   └── ai_job_market_insights.csv   # Dataset: 500 vagas de emprego em IA
-│
-├── delta_lake.ipynb                 # Notebook 1 — Delta Lake
-├── apache_iceberg.ipynb             # Notebook 2 — Apache Iceberg
-│
-├── docs/                            # Documentação MkDocs (publicada no GitHub Pages)
-│   ├── index.md
-│   ├── apache-spark.md
-│   ├── delta-lake.md
-│   └── apache-iceberg.md
-├── mkdocs.yml                       # Configuração do MkDocs
-│
-├── spark-warehouse/                 # Gerado automaticamente — tabelas Delta
-├── iceberg-warehouse/               # Gerado automaticamente — tabelas Iceberg
-│
-├── pyproject.toml                   # Dependências (uv)
-└── uv.lock                          # Lockfile com versões exatas
-```
+Utilizando o motor do **Apache Spark**, o projeto ingere um dataset local com 500 vagas de emprego na área de Inteligência Artificial e executa operações transacionais (ACID: INSERT, UPDATE, DELETE), além de demonstrar o recurso de Time Travel e controle de Snapshots.
 
 ---
 
 ## Pré-requisitos
 
-| Ferramenta | Versão mínima | Instalação |
+Para garantir a execução correta sem conflitos de ambiente, o projeto foi estruturado para rodar no **Ubuntu (WSL 2)**. 
+
+| Ferramenta | Versão | Finalidade |
 |---|---|---|
-| Ubuntu (WSL 2) | 22.04+ | — |
-| Java (OpenJDK) | **17** | `sudo apt install openjdk-17-jdk` |
-| uv | latest | `curl -LsSf https://astral.sh/uv/install.sh \| sh` |
-| Python | 3.11+ | gerenciado pelo uv |
+| Ubuntu (WSL 2) | 22.04+ | Ambiente isolado de execução |
+| Java (OpenJDK) | 17 | Runtime obrigatório do Apache Spark |
+| uv | 0.4+ | Gerenciamento de dependências e ambiente virtual |
+| Python | 3.11+ | Linguagem base (gerenciada pelo uv) |
 
 ---
 
-## Parte 1 — Configuração do Ambiente
+## Configurando o Ambiente
 
-### Passo 1 — Java 17
+### 1. Instalação do Java 17
 
-Abra o terminal do **Ubuntu (WSL)** e execute:
+O Spark exige o Java para rodar. No terminal do seu Ubuntu (WSL), execute:
 
 ```bash
 sudo apt update && sudo apt install -y openjdk-17-jdk
 ```
 
-Adicione ao `~/.bashrc` para persistir entre sessões:
+Para garantir que o Java fique salvo nas variáveis de ambiente:
 
 ```bash
 echo 'export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64' >> ~/.bashrc
@@ -63,206 +42,79 @@ echo 'export PATH="$JAVA_HOME/bin:$PATH"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-Verifique:
-
-```bash
-java -version
-# Esperado: openjdk version "17.x.x"
-```
-
----
-
-### Passo 2 — uv
+### 2. Instalação do gerenciador uv
 
 ```bash
 curl -LsSf https://astral.sh/uv/install.sh | sh
 source ~/.bashrc
-uv --version
 ```
 
----
+### 3. Clone e Sincronização
 
-### Passo 3 — Clone e instalação das dependências
+Clone este repositório e baixe todas as bibliotecas necessárias de forma automática:
 
 ```bash
-git clone <URL-DO-REPOSITORIO>
-cd ~/Apache-spark
-uv venv
-source .venv/bin/activate
+git clone https://github.com/Xandetds/Apache-spark.git
+cd Apache-spark
 uv sync
 ```
 
-`uv sync` instala as versões exatas do `uv.lock`:
-- `pyspark==3.5.3`
-- `delta-spark==3.2.0`
-- `jupyterlab`, `ipykernel`, `mkdocs`, `mkdocs-material`
+> O comando `uv sync` cria o ambiente virtual e instala PySpark, Delta, JupyterLab e MkDocs automaticamente.
 
 ---
 
-## Parte 2 — Rodando os Notebooks
+## Executando os Notebooks
 
-> **IMPORTANTE:** sempre use o terminal do Ubuntu/WSL para rodar o Jupyter.
-> Abrir os notebooks pelo VS Code no Windows usa o Python do Windows (não o virtualenv WSL),
-> causando `ModuleNotFoundError: No module named 'pyspark'`.
+> **IMPORTANTE:** Para evitar o erro `ModuleNotFoundError`, não abra os notebooks clicando diretamente neles pelo VS Code no Windows. Inicie o servidor pelo terminal do WSL usando o `uv`.
 
-### Via terminal Ubuntu (recomendado)
+No terminal do Ubuntu, dentro da pasta do projeto, inicie o JupyterLab:
 
 ```bash
-cd ~/Apache-spark
-source .venv/bin/activate
-jupyter lab
+uv run jupyter lab
 ```
 
-Copie a URL com token que aparece no terminal (ex.: `http://localhost:8888/lab?token=abc123`)
-e cole em qualquer browser no Windows. O JupyterLab abrirá com o ambiente correto.
+O terminal exibirá uma URL com um token (ex: `http://localhost:8888/lab?token=...`). Copie essa URL e cole no seu navegador.
 
-### Via VS Code com WSL (alternativa)
+### Ordem de Execução
 
-1. No Windows, abra o VS Code.
-2. Clique no botão verde **`><`** no canto inferior esquerdo → **"Connect to WSL"**.
-3. Abra a pasta do projeto: `File > Open Folder > /home/alexandre/Apache-spark`.
-4. Abra um terminal integrado no VS Code: **Terminal > New Terminal**.
-5. No terminal (que agora é WSL), execute:
+1. `delta_lake.ipynb` — Execute todas as células em ordem (`Shift + Enter`). Este notebook criará a tabela Delta e demonstrará as operações.
+
+2. **Desligue o Kernel do Delta** — No menu superior do JupyterLab, vá em `Kernel > Shut Down Kernel`. Isso evita que duas instâncias do Spark briguem pela mesma porta local.
+
+3. `apache_iceberg.ipynb` — Abra o arquivo e execute as células. Na primeira execução, o Spark baixará o conector do Iceberg via Maven Central (~80 MB).
+
+---
+
+## Documentação (MkDocs)
+
+A documentação detalhada foi gerada usando o MkDocs Material e está publicada no GitHub Pages.
+
+### Visualizando localmente
 
 ```bash
-source .venv/bin/activate
-jupyter lab
+uv run mkdocs serve
 ```
 
-6. Copie a URL com token e cole no browser.
+Acesse `http://127.0.0.1:8000` no seu navegador.
 
-### Ordem de execução dos notebooks
-
-> Execute as células **de cima para baixo** (`Shift + Enter` ou **Run All** `▶▶`).
-
-**`delta_lake.ipynb`** — execute primeiro.
-
-| Célula | O que faz |
-|---|---|
-| Setup | Cria SparkSession com Delta, limpa execuções anteriores |
-| Carga Inicial | Lê o CSV e cria a tabela `ai_jobs_delta` |
-| INSERT | Adiciona vaga de Data Engineer em Urussanga, SC |
-| UPDATE | Reajuste salarial +10% para vagas de alto impacto |
-| DELETE | Remove vagas com perspectiva `Decline` |
-| DESCRIBE HISTORY | Exibe o log de versões da tabela |
-| Time Travel | Consulta os dados na Versão 0 (estado original) |
-
-**`apache_iceberg.ipynb`** — execute após encerrar o kernel do Delta.
-
-> Encerre o kernel do Delta antes: **Kernel > Shut Down Kernel** no JupyterLab.
-
-| Célula | O que faz |
-|---|---|
-| Setup | Cria SparkSession com Iceberg, limpa execuções anteriores |
-| Carga Inicial | Lê o CSV e cria `local.db_jobs.ai_jobs_iceberg` |
-| INSERT | Adiciona vaga de Data Engineer em Urussanga, SC |
-| UPDATE | Reajuste salarial +10% para vagas de alto impacto |
-| DELETE | Remove vagas com perspectiva `Decline` |
-| Snapshots | Lista o histórico de snapshots |
-| Time Travel | Consulta o snapshot inicial via `VERSION AS OF <id>` |
-
-> **Na primeira execução de cada notebook**, o Spark baixa os JARs via Maven (~100 MB Delta, ~80 MB Iceberg). Aguarde.
-
----
-
-## Parte 3 — Rodando o MkDocs
-
-### Preview local
-
-Com o ambiente virtual ativo, rode:
+### Publicando atualizações
 
 ```bash
-cd ~/Apache-spark
-source .venv/bin/activate
-mkdocs serve
-```
-
-Acesse `http://127.0.0.1:8000` no browser. O servidor recarrega automaticamente ao editar os arquivos em `docs/`.
-
-Para parar: `Ctrl + C`.
-
----
-
-### Deploy no GitHub Pages
-
-O comando abaixo constrói o site e faz push para o branch `gh-pages` do repositório:
-
-```bash
-cd ~/Apache-spark
-source .venv/bin/activate
-mkdocs gh-deploy
-```
-
-Você verá algo como:
-
-```
-INFO - Building documentation...
-INFO - Deploying to GitHub Pages
-INFO - Your documentation should shortly be available at:
-       https://<seu-usuario>.github.io/<nome-do-repo>/
+uv run mkdocs gh-deploy
 ```
 
 ---
 
-### Ativar o GitHub Pages no repositório (apenas na primeira vez)
-
-1. Acesse o repositório no GitHub.
-2. Vá em **Settings > Pages**.
-3. Em **Source**, selecione **"Deploy from a branch"**.
-4. Em **Branch**, selecione **`gh-pages`** e pasta **`/ (root)`**.
-5. Clique em **Save**.
-
-Após alguns segundos, o site estará disponível em:
-
-```
-https://<seu-usuario>.github.io/<nome-do-repo>/
-```
-
----
-
-## Comparativo Técnico
+## Comparativo Técnico do Projeto
 
 | Característica | Delta Lake | Apache Iceberg |
 |---|---|---|
 | Armazenamento | Parquet + `_delta_log/` (JSON) | Parquet + `metadata/` (Avro/JSON) |
-| Controle de versão | Versões numéricas (0, 1, 2...) | Snapshot IDs únicos (long) |
+| Controle de versão | Versões numéricas (0, 1, 2...) | Snapshot IDs únicos (long integer) |
 | Time Travel | `VERSION AS OF 0` | `VERSION AS OF <snapshot_id>` |
 | Auditoria | `DESCRIBE HISTORY <table>` | `SELECT * FROM <table>.snapshots` |
-| Engines suportadas | Spark, Databricks | Spark, Flink, Trino, Presto, Hive |
-| Catálogo | `DeltaCatalog` (substitui default) | `SparkCatalog` (catálogo adicional) |
+| Engines suportadas | Foco em Spark e Databricks | Spark, Flink, Trino, Presto, Snowflake |
+| Setup do Catálogo | `DeltaCatalog` (substitui o padrão) | `SparkCatalog` (adicionado via Hadoop) |
 
 ---
 
-## Erros Comuns e Soluções
-
-**`JAVA_HOME not set` ou `UnsupportedClassVersionError`**
-→ Java 17 não está configurado. Reveja o Passo 1 acima.
-
----
-
-**`ModuleNotFoundError: No module named 'pyspark'`**
-→ O virtualenv não está ativo. Execute:
-
-```bash
-source .venv/bin/activate
-jupyter lab
-```
-
----
-
-**`DELTA_CREATE_TABLE_WITH_NON_EMPTY_LOCATION`**
-→ A célula de setup já limpa os arquivos anteriores com `shutil.rmtree`. Reexecute o notebook desde o início (Kernel > Restart & Run All).
-
----
-
-**Iceberg — JAR não encontrado no Maven**
-→ Limpe o cache do Ivy:
-
-```bash
-rm -rf ~/.ivy2/cache/org.apache.iceberg
-```
-
----
-
-**Dois notebooks abertos travam**
-→ Encerre o kernel de um antes de abrir o outro: **Kernel > Shut Down Kernel**.
