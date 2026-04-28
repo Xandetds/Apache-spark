@@ -3,7 +3,6 @@
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
 [![Docs](https://img.shields.io/badge/docs-mkdocs-blue)](https://Xandetds.github.io/Apache-spark/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 Repositório modelo para desenvolvimento de projetos da disciplina de Engenharia de Dados do curso de Engenharia de Software da UNISATC. Demonstração prática de um ambiente Apache Spark local processando dados com duas tecnologias de tabelas abertas (open table formats): **Delta Lake** e **Apache Iceberg**.
 
@@ -157,5 +156,4 @@ Este projeto está sob a licença MIT — veja o arquivo [LICENSE](LICENSE) para
 
 - [Documentação Oficial do Apache Spark](https://spark.apache.org/docs/latest/)
 - [Delta Lake Docs](https://docs.delta.io/)
-- [Apache Iceberg Spark Quickstart](https://iceberg.apache.org/docs/latest/spark-quickstart/)
 - [Material for MkDocs](https://squidfunk.github.io/mkdocs-material/)
